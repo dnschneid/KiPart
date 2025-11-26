@@ -927,7 +927,7 @@ def rows_to_symbol(
                                    and right sides. Defaults to False.
         hide_pin_num (bool, optional): Hide pin number. Defaults to False.
         justify (str, optional): Sets the justification on visible properties.
-                               Can be left, center, or right. Defaults to right.
+                               Can be left, center, right, or mixed. Defaults to right.
 
     Returns:
         Sexp: KiCad symbol as an Sexp object, ready to be included in a library.
@@ -1362,6 +1362,14 @@ def rows_to_symbol(
     br_y = min(unit_bottom_right_corner, key=lambda c: c[1])[1]
     for name, [value, x_offset, y_offset, justify, hide] in properties.items():
         size = FONT_SIZE
+        if justify == "mixed":
+            justify = "left"
+            if name == "Reference":
+                size = 1.524
+                y_offset = properties["Value"][2]
+            elif name == "Value":
+                justify = "right"
+                x_offset = br_x - tl_x
         anchor_y = tl_y + size / 2 if y_offset >= 0 else br_y - size / 2
         symbol_sexp.append(
             [
@@ -1437,7 +1445,7 @@ def rows_to_symbol_lib(
                                0.5 (default) centers the pins.
         hide_pin_num (bool, optional): Hide pin number. Defaults to False.
         justify (str, optional): Sets the justification on visible properties.
-                               Can be left, center, or right. Defaults to right.
+                               Can be left, center, right, or mixed. Defaults to right.
 
     Returns:
         Sexp: Complete KiCad symbol library as an Sexp object, ready to write to file.
@@ -1547,7 +1555,7 @@ def row_file_to_symbol_lib_file(
                                0.5 (default) centers the pins.
         hide_pin_num (bool, optional): Hide pin number. Defaults to False.
         justify (str, optional): Sets the justification on visible properties.
-                               Can be left, center, or right. Defaults to right.
+                               Can be left, center, right, or mixed. Defaults to right.
 
     Returns:
         str: Path to the generated .kicad_sym file.
@@ -1801,7 +1809,7 @@ def kipart():
     parser.add_argument(
         "-j",
         "--justify",
-        choices=["left", "center", "right"],
+        choices=["left", "center", "right", "mixed"],
         default="right",
         help="Sets the justification on visible properties",
     )
